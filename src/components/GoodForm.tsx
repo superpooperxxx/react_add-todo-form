@@ -1,22 +1,33 @@
-import { Dispatch, FC, FormEvent, SetStateAction, useState } from 'react';
+import { FC, FormEvent, useState } from 'react';
+import cn from 'classnames';
 
-import { colors } from '../api/colors';
+import { getColorById, getColors } from '../api/colors.service';
 
 import { Good } from '../types';
 
-import { getColorById } from '../utils';
-import cn from 'classnames';
-
 interface Props {
-  setGoods: Dispatch<SetStateAction<Good[]>>;
+  onSubmit: (newGood: Good) => void;
+  good?: Good;
+  onCancel?: () => void;
 }
 
-export const AddGoodForm: FC<Props> = ({ setGoods }) => {
-  const [newGoodName, setNewGoodName] = useState('');
+export const GoodForm: FC<Props> = ({
+  onSubmit,
+  good,
+  onCancel = () => {},
+}) => {
+  const DEFAULT_GOOD_NAME = good?.name || '';
+  const DEFAULT_COLOR_ID = good?.colorId || 0;
+
+  const [newGoodName, setNewGoodName] =
+    useState<Good['name']>(DEFAULT_GOOD_NAME);
   const [nameError, setNameError] = useState('');
 
-  const [selectedColorId, setSelectedColorId] = useState(0);
+  const [selectedColorId, setSelectedColorId] =
+    useState<Good['colorId']>(DEFAULT_COLOR_ID);
   const [colorIdError, setColorIdError] = useState('');
+
+  const colors = getColors();
 
   const handleReset = () => {
     setNewGoodName('');
@@ -24,6 +35,16 @@ export const AddGoodForm: FC<Props> = ({ setGoods }) => {
 
     setSelectedColorId(0);
     setColorIdError('');
+  };
+
+  const handleCancel = () => {
+    setNewGoodName(DEFAULT_GOOD_NAME);
+    setNameError('');
+
+    setSelectedColorId(DEFAULT_COLOR_ID);
+    setColorIdError('');
+
+    onCancel();
   };
 
   const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
@@ -42,19 +63,19 @@ export const AddGoodForm: FC<Props> = ({ setGoods }) => {
     }
 
     const newGood: Good = {
-      id: Date.now(),
+      id: good?.id || Date.now(),
       name: newGoodName,
       colorId: selectedColorId,
       color: getColorById(selectedColorId),
     };
 
-    setGoods(currentGoods => [...currentGoods, newGood]);
+    onSubmit(newGood);
 
     handleReset();
   };
 
   return (
-    <form onSubmit={handleSubmit}>
+    <form onSubmit={handleSubmit} onReset={handleReset}>
       <div className="field">
         <input
           type="text"
@@ -64,6 +85,7 @@ export const AddGoodForm: FC<Props> = ({ setGoods }) => {
             setNameError('');
           }}
           className={cn({ 'with-error': nameError })}
+          placeholder="e.g. Horilka"
         />
 
         {nameError && <span className="error">{nameError}</span>}
@@ -78,9 +100,7 @@ export const AddGoodForm: FC<Props> = ({ setGoods }) => {
           }}
           className={cn({ 'with-error': colorIdError })}
         >
-          <option value="0" disabled>
-            Choose a color
-          </option>
+          <option value="0">Choose a color</option>
 
           {colors.map(color => (
             <option key={color.id} value={color.id}>
@@ -92,7 +112,12 @@ export const AddGoodForm: FC<Props> = ({ setGoods }) => {
         {colorIdError && <span className="error">{colorIdError}</span>}
       </div>
 
-      <button type="submit">Add</button>
+      <button type="submit">{good ? 'Save' : 'Add'}</button>
+      <button type="reset">Reset</button>
+
+      <button type="button" onClick={handleCancel}>
+        Cancel
+      </button>
     </form>
   );
 };
