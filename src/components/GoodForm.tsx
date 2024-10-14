@@ -1,9 +1,9 @@
-import { FC, FormEvent, useState } from 'react';
+import { FC, FormEvent, useEffect, useState } from 'react';
 import cn from 'classnames';
 
 import { getColorById, getColors } from '../api/colors.service';
 
-import { Good } from '../types';
+import { Color, Good } from '../types';
 
 interface Props {
   onSubmit: (newGood: Good) => void;
@@ -27,7 +27,19 @@ export const GoodForm: FC<Props> = ({
     useState<Good['colorId']>(DEFAULT_COLOR_ID);
   const [colorIdError, setColorIdError] = useState('');
 
-  const colors = getColors();
+  const [colors, setColors] = useState<Color[]>([]);
+
+  useEffect(() => {
+    getColors().then(setColors);
+
+    const intervalId = setInterval(() => {
+      getColors().then(setColors);
+    }, 3000);
+
+    return () => {
+      clearInterval(intervalId);
+    };
+  }, []);
 
   const handleReset = () => {
     setNewGoodName('');
@@ -47,7 +59,7 @@ export const GoodForm: FC<Props> = ({
     onCancel();
   };
 
-  const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
     if (!newGoodName) {
@@ -66,7 +78,7 @@ export const GoodForm: FC<Props> = ({
       id: good?.id || Date.now(),
       name: newGoodName,
       colorId: selectedColorId,
-      color: getColorById(selectedColorId),
+      color: await getColorById(selectedColorId),
     };
 
     onSubmit(newGood);

@@ -9,12 +9,12 @@ import { Good } from './types';
 
 import { goodsFromServer } from './api/goods';
 
-import { getColorById } from './api/colors.service';
+// import { getColorById } from './api/colors.service';
 
 const goodsWithColor: Good[] = goodsFromServer.map(good => {
   return {
     ...good,
-    color: getColorById(good.colorId),
+    color: { id: 1, name: 'red' },
   };
 });
 
@@ -37,7 +37,7 @@ const getFilteredGoods = (goods: Good[], query: string) => {
 export const App = () => {
   const [goods, setGoods] = useState<Good[]>(goodsWithColor);
   const [query, setQuery] = useState('');
-  const [count, setCount] = useState(0);
+  const [showForm, setShowForm] = useState(true);
 
   const handleAddGood = (newGood: Good) => {
     setGoods(currentGoods => [...currentGoods, newGood]);
@@ -64,17 +64,16 @@ export const App = () => {
     <div className="App">
       <h1>Goods</h1>
 
-      <span>{count}</span>
-      <button type="button" onClick={() => setCount(current => current + 1)}>
-        increment
-      </button>
-
       <label style={{ display: 'block', marginBottom: '15px' }}>
         Search by name
         <input value={query} onChange={event => setQuery(event.target.value)} />
       </label>
 
-      <GoodForm onSubmit={handleAddGood} />
+      {showForm && <GoodForm onSubmit={handleAddGood} />}
+
+      <button type="button" onClick={() => setShowForm(current => !current)}>
+        {showForm ? 'hide' : 'show'} form
+      </button>
 
       <GoodsList
         goods={filteredGoods}
