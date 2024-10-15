@@ -11,8 +11,11 @@ interface Props {
 export const GoodCard: FC<Props> = ({ good, onDelete, onUpdate }) => {
   const [isEditing, setIsEditing] = useState(false);
 
-  const handleUpdate = (updatedGood: Good) => {
-    onUpdate(updatedGood);
+  const handleUpdate = (updatedGood: Omit<Good, 'id'>) => {
+    onUpdate({
+      id: good.id,
+      ...updatedGood,
+    });
     setIsEditing(false);
   };
 
@@ -28,7 +31,7 @@ export const GoodCard: FC<Props> = ({ good, onDelete, onUpdate }) => {
         <>
           <p
             className="GoodCard__title"
-            style={{ color: good.color?.name || 'black' }}
+            style={{ color: good.color || 'black' }}
           >
             {good.name}
           </p>

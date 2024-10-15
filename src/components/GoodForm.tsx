@@ -1,12 +1,10 @@
-import { FC, FormEvent, useEffect, useState } from 'react';
+import { FC, FormEvent, useState } from 'react';
 import cn from 'classnames';
 
-import { getColorById, getColors } from '../api/colors.service';
-
-import { Color, Good } from '../types';
+import { Good } from '../types';
 
 interface Props {
-  onSubmit: (newGood: Good) => void;
+  onSubmit: (newGood: Omit<Good, 'id'>) => void;
   good?: Good;
   onCancel?: () => void;
 }
@@ -17,35 +15,21 @@ export const GoodForm: FC<Props> = ({
   onCancel = () => {},
 }) => {
   const DEFAULT_GOOD_NAME = good?.name || '';
-  const DEFAULT_COLOR_ID = good?.colorId || 0;
+  const DEFAULT_COLOR = good?.color || 'black';
 
   const [newGoodName, setNewGoodName] =
     useState<Good['name']>(DEFAULT_GOOD_NAME);
   const [nameError, setNameError] = useState('');
 
-  const [selectedColorId, setSelectedColorId] =
-    useState<Good['colorId']>(DEFAULT_COLOR_ID);
+  const [selectedColor, setSelectedColor] =
+    useState<Good['color']>(DEFAULT_COLOR);
   const [colorIdError, setColorIdError] = useState('');
-
-  const [colors, setColors] = useState<Color[]>([]);
-
-  useEffect(() => {
-    getColors().then(setColors);
-
-    const intervalId = setInterval(() => {
-      getColors().then(setColors);
-    }, 3000);
-
-    return () => {
-      clearInterval(intervalId);
-    };
-  }, []);
 
   const handleReset = () => {
     setNewGoodName('');
     setNameError('');
 
-    setSelectedColorId(0);
+    setSelectedColor('black');
     setColorIdError('');
   };
 
@@ -53,7 +37,7 @@ export const GoodForm: FC<Props> = ({
     setNewGoodName(DEFAULT_GOOD_NAME);
     setNameError('');
 
-    setSelectedColorId(DEFAULT_COLOR_ID);
+    setSelectedColor(DEFAULT_COLOR);
     setColorIdError('');
 
     onCancel();
@@ -68,17 +52,9 @@ export const GoodForm: FC<Props> = ({
       return;
     }
 
-    if (selectedColorId === 0) {
-      setColorIdError('Please choose a color!');
-
-      return;
-    }
-
-    const newGood: Good = {
-      id: good?.id || Date.now(),
+    const newGood: Omit<Good, 'id'> = {
       name: newGoodName,
-      colorId: selectedColorId,
-      color: await getColorById(selectedColorId),
+      color: selectedColor,
     };
 
     onSubmit(newGood);
@@ -105,18 +81,18 @@ export const GoodForm: FC<Props> = ({
 
       <div className="field">
         <select
-          value={selectedColorId}
+          value={selectedColor}
           onChange={event => {
-            setSelectedColorId(+event.target.value);
+            setSelectedColor(event.target.value);
             setColorIdError('');
           }}
           className={cn({ 'with-error': colorIdError })}
         >
-          <option value="0">Choose a color</option>
+          <option value="black">black</option>
 
-          {colors.map(color => (
-            <option key={color.id} value={color.id}>
-              {color.name}
+          {['red', 'blue', 'green'].map(color => (
+            <option key={color} value={color}>
+              {color}
             </option>
           ))}
         </select>
