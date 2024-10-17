@@ -1,55 +1,52 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
+import { useMemo, useState } from 'react';
 import './App.scss';
 
 import { GoodForm } from './components/GoodForm';
 import { GoodsList } from './components/GoodsList';
 
 import { useGoods } from './hooks/useGoods';
+import { Good } from './types';
 
-// const getFilteredGoods = (goods: Good[], query: string) => {
-//   let filteredGoods = [...goods];
+const getFilteredGoods = (goods: Good[], query: string) => {
+  let filteredGoods = [...goods];
 
-//   const normalizedQuery = query.trim().toLowerCase();
+  const normalizedQuery = query.trim().toLowerCase();
 
-//   if (normalizedQuery) {
-//     filteredGoods = filteredGoods.filter(good => {
-//       const normalizedGoodName = good.name.trim().toLowerCase();
+  if (normalizedQuery) {
+    filteredGoods = filteredGoods.filter(good => {
+      const normalizedGoodName = good.name.trim().toLowerCase();
 
-//       return normalizedGoodName.includes(normalizedQuery);
-//     });
-//   }
+      return normalizedGoodName.includes(normalizedQuery);
+    });
+  }
 
-//   return filteredGoods;
-// };
+  return filteredGoods;
+};
 
 export const App = () => {
   const { goods, handleAddGood, handleDeleteGood, handleUpdateGood } =
     useGoods();
-  // const [query, setQuery] = useState('');
-  // const [showForm, setShowForm] = useState(true);
+  const [query, setQuery] = useState('');
 
-  // const filteredGoods = useMemo(
-  //   () => getFilteredGoods(goods, query),
-  //   [goods, query],
-  // );
+  const filteredGoods = useMemo(
+    () => getFilteredGoods(goods, query),
+    [goods, query],
+  );
 
   return (
     <div className="App">
       <h1>Goods</h1>
 
-      {/* <label style={{ display: 'block', marginBottom: '15px' }}>
+      <label style={{ display: 'block', marginBottom: '15px' }}>
         Search by name
         <input value={query} onChange={event => setQuery(event.target.value)} />
-      </label> */}
+      </label>
 
-      {true && <GoodForm onSubmit={handleAddGood} />}
-
-      {/* <button type="button" onClick={() => setShowForm(current => !current)}>
-        {showForm ? 'hide' : 'show'} form
-      </button> */}
+      <GoodForm onSubmit={handleAddGood} />
 
       <GoodsList
-        goods={goods}
+        goods={filteredGoods}
         onDelete={handleDeleteGood}
         onUpdate={handleUpdateGood}
       />
