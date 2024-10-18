@@ -1,15 +1,17 @@
 import { FC, useState } from 'react';
 import { Good } from '../types';
 import { GoodForm } from './GoodForm';
+import { useGoodsMethods } from '../store/GoodsProvider';
 
 interface Props {
   good: Good;
-  onDelete: (goodId: Good['id']) => void;
-  onUpdate: (updatedGood: Good) => void;
 }
 
-export const GoodCard: FC<Props> = ({ good, onDelete, onUpdate }) => {
+export const GoodCard: FC<Props> = ({ good }) => {
   const [isEditing, setIsEditing] = useState(false);
+
+  const { handleUpdateGood: onUpdate, handleDeleteGood: onDelete } =
+    useGoodsMethods();
 
   const handleUpdate = (updatedGood: Omit<Good, 'id'>) => {
     onUpdate({

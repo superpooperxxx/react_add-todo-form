@@ -2,11 +2,11 @@
 import { useMemo, useState } from 'react';
 import './App.scss';
 
-import { GoodForm } from './components/GoodForm';
 import { GoodsList } from './components/GoodsList';
 
-import { useGoods } from './hooks/useGoods';
 import { Good } from './types';
+import { useGoods } from './store/GoodsProvider';
+import { AddGoodForm } from './components/AddGoodForm';
 
 const getFilteredGoods = (goods: Good[], query: string) => {
   let filteredGoods = [...goods];
@@ -25,8 +25,8 @@ const getFilteredGoods = (goods: Good[], query: string) => {
 };
 
 export const App = () => {
-  const { goods, handleAddGood, handleDeleteGood, handleUpdateGood } =
-    useGoods();
+  const goods = useGoods();
+
   const [query, setQuery] = useState('');
 
   const filteredGoods = useMemo(
@@ -43,13 +43,9 @@ export const App = () => {
         <input value={query} onChange={event => setQuery(event.target.value)} />
       </label>
 
-      <GoodForm onSubmit={handleAddGood} />
+      <AddGoodForm />
 
-      <GoodsList
-        goods={filteredGoods}
-        onDelete={handleDeleteGood}
-        onUpdate={handleUpdateGood}
-      />
+      <GoodsList goods={filteredGoods} />
     </div>
   );
 };
